@@ -58,18 +58,16 @@ export function PlayingCard({ card, size = "md", className, showBack = false }: 
       )}
     >
       {/* Top-left corner */}
-      <div className="absolute top-1 left-1.5 flex flex-col items-start leading-none">
+      <div className="absolute top-1 left-1.5 leading-none">
         <span className="font-bold">{card.rank}</span>
-        <span className="text-lg -mt-1">{card.suit}</span>
       </div>
-      {/* Center suit watermark */}
+      {/* Center suit */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <span className="text-2xl opacity-20">{card.suit}</span>
+        <span className="text-3xl font-bold">{card.suit}</span>
       </div>
       {/* Bottom-right corner (upside down) */}
-      <div className="absolute bottom-1 right-1.5 flex flex-col items-start leading-none rotate-180">
+      <div className="absolute bottom-1 right-1.5 leading-none rotate-180">
         <span className="font-bold">{card.rank}</span>
-        <span className="text-lg -mt-1">{card.suit}</span>
       </div>
     </div>
   )
