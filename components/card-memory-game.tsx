@@ -47,7 +47,20 @@ export function CardMemoryGame() {
   const [gameStartTime, setGameStartTime] = useState<number>(0)
   const [memorizeStartTime, setMemorizeStartTime] = useState<number>(0)
   const [memorizeDuration, setMemorizeDuration] = useState<number>(0)
+  const [memorizeElapsed, setMemorizeElapsed] = useState<number>(0)
   const [recallElapsed, setRecallElapsed] = useState<number>(0)
+  const [recallDuration, setRecallDuration] = useState<number>(0)
+
+  // Timer for memorize phase
+  useEffect(() => {
+    if (gamePhase !== "memorize") return
+    
+    const interval = setInterval(() => {
+      setMemorizeElapsed(Date.now() - memorizeStartTime)
+    }, 100)
+    
+    return () => clearInterval(interval)
+  }, [gamePhase, memorizeStartTime])
 
   // Timer for recall phase
   useEffect(() => {
@@ -66,6 +79,7 @@ export function CardMemoryGame() {
     setCurrentIndex(0)
     setSelectedSuit(null)
     setGuessHistory([])
+    setMemorizeElapsed(0)
     setGamePhase("memorize")
     setMemorizeStartTime(Date.now())
   }, [totalCards])
@@ -127,16 +141,19 @@ export function CardMemoryGame() {
           if (currentIndex < deck.length - 1) {
             setCurrentIndex(currentIndex + 1)
           } else {
+            setRecallDuration(Date.now() - gameStartTime)
             setGamePhase("result")
           }
         }, 1500)
       } else {
+        setRecallDuration(Date.now() - gameStartTime)
         setGamePhase("result")
       }
     } else if (currentIndex < deck.length - 1) {
       setCurrentIndex(currentIndex + 1)
     } else {
       // All cards completed
+      setRecallDuration(Date.now() - gameStartTime)
       setGamePhase("result")
     }
   }
@@ -258,6 +275,9 @@ export function CardMemoryGame() {
       <div className="w-full max-w-4xl mx-auto space-y-6">
         <Card>
           <CardHeader className="text-center">
+            <div className="text-3xl font-mono font-bold text-primary mb-2">
+              {formatTime(memorizeElapsed)}
+            </div>
             <CardTitle>Memorize the Cards</CardTitle>
             <CardDescription>
               Take your time to memorize {deck.length} cards in order
@@ -434,7 +454,7 @@ export function CardMemoryGame() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4 text-center">
+            <div className="grid grid-cols-3 gap-4 text-center">
               <div className="p-4 bg-muted rounded-lg">
                 <div className="text-2xl font-bold text-foreground">{correctCount}/{deck.length}</div>
                 <div className="text-sm text-muted-foreground">Accuracy</div>
@@ -442,6 +462,10 @@ export function CardMemoryGame() {
               <div className="p-4 bg-muted rounded-lg">
                 <div className="text-2xl font-bold text-foreground">{formatTime(memorizeDuration)}</div>
                 <div className="text-sm text-muted-foreground">Memorize Time</div>
+              </div>
+              <div className="p-4 bg-muted rounded-lg">
+                <div className="text-2xl font-bold text-foreground">{formatTime(recallDuration)}</div>
+                <div className="text-sm text-muted-foreground">Recall Time</div>
               </div>
             </div>
             <Button onClick={resetGame} className="w-full" size="lg">
