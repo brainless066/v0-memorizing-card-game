@@ -37,7 +37,9 @@ const suitButtonColors: Record<Suit, string> = {
 export function CardMemoryGame() {
   const [gamePhase, setGamePhase] = useState<GamePhase>("setup")
   const [displayMode, setDisplayMode] = useState<DisplayMode>("one-by-one")
+  const [practiceMode, setPracticeMode] = useState(false)
   const [totalCards, setTotalCards] = useState(10)
+  const [wrongFlash, setWrongFlash] = useState<{ correct: CardType; guessed: CardType } | null>(null)
   const [deck, setDeck] = useState<CardType[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [selectedSuit, setSelectedSuit] = useState<Suit | null>(null)
@@ -117,11 +119,24 @@ export function CardMemoryGame() {
     setSelectedSuit(null)
 
     if (!isCorrect) {
-      setGamePhase("result")
+      if (practiceMode) {
+        // Show wrong flash briefly, then continue
+        setWrongFlash({ correct: correctCard, guessed: guessedCard })
+        setTimeout(() => {
+          setWrongFlash(null)
+          if (currentIndex < deck.length - 1) {
+            setCurrentIndex(currentIndex + 1)
+          } else {
+            setGamePhase("result")
+          }
+        }, 1500)
+      } else {
+        setGamePhase("result")
+      }
     } else if (currentIndex < deck.length - 1) {
       setCurrentIndex(currentIndex + 1)
     } else {
-      // All cards guessed correctly
+      // All cards completed
       setGamePhase("result")
     }
   }
@@ -194,7 +209,7 @@ export function CardMemoryGame() {
                 onClick={() => setDisplayMode("one-by-one")}
                 className="h-auto py-3 flex flex-col"
               >
-                <span className="text-lg">📄</span>
+                <span className="text-lg">1</span>
                 <span>One by One</span>
               </Button>
               <Button
@@ -202,8 +217,30 @@ export function CardMemoryGame() {
                 onClick={() => setDisplayMode("whole")}
                 className="h-auto py-3 flex flex-col"
               >
-                <span className="text-lg">📋</span>
+                <span className="text-lg">All</span>
                 <span>Whole View</span>
+              </Button>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <label className="text-sm font-medium text-foreground">Game Mode</label>
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                variant={!practiceMode ? "default" : "outline"}
+                onClick={() => setPracticeMode(false)}
+                className="h-auto py-3 flex flex-col"
+              >
+                <span className="font-bold">Challenge</span>
+                <span className="text-xs opacity-80">Ends on first mistake</span>
+              </Button>
+              <Button
+                variant={practiceMode ? "default" : "outline"}
+                onClick={() => setPracticeMode(true)}
+                className="h-auto py-3 flex flex-col"
+              >
+                <span className="font-bold">Practice</span>
+                <span className="text-xs opacity-80">Continue after mistakes</span>
               </Button>
             </div>
           </div>
@@ -280,14 +317,42 @@ export function CardMemoryGame() {
   if (gamePhase === "recall") {
     return (
       <div className="w-full max-w-2xl mx-auto space-y-6">
+        {/* Wrong answer flash overlay */}
+        {wrongFlash && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-red-950/80 animate-in fade-in duration-200">
+            <div className="bg-card rounded-xl p-8 shadow-2xl border-2 border-red-500 text-center space-y-4">
+              <div className="text-red-500 text-xl font-bold">Wrong!</div>
+              <div className="flex items-center justify-center gap-6">
+                <div className="flex flex-col items-center gap-2">
+                  <PlayingCard card={wrongFlash.correct} size="lg" />
+                  <span className="text-sm text-muted-foreground">Correct</span>
+                </div>
+                <div className="text-2xl text-muted-foreground">vs</div>
+                <div className="flex flex-col items-center gap-2">
+                  <PlayingCard card={wrongFlash.guessed} size="lg" />
+                  <span className="text-sm text-muted-foreground">Your guess</span>
+                </div>
+              </div>
+              <div className="text-sm text-muted-foreground">Continuing in a moment...</div>
+            </div>
+          </div>
+        )}
         <Card>
           <CardHeader className="text-center">
-            <div className="text-3xl font-mono font-bold text-primary mb-2">
-              {formatTime(recallElapsed)}
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <div className="text-3xl font-mono font-bold text-primary">
+                {formatTime(recallElapsed)}
+              </div>
+              {practiceMode && (
+                <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded-full">Practice</span>
+              )}
             </div>
             <CardTitle>Recall Card #{currentIndex + 1}</CardTitle>
             <CardDescription>
               {correctCount} correct so far • {deck.length - currentIndex} remaining
+              {practiceMode && guessHistory.length > correctCount && (
+                <span className="text-red-400"> • {guessHistory.length - correctCount} wrong</span>
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -355,15 +420,17 @@ export function CardMemoryGame() {
 
   if (gamePhase === "result") {
     const allCorrect = correctCount === deck.length
+    const completedAll = guessHistory.length === deck.length
     return (
       <div className="w-full max-w-3xl mx-auto space-y-6">
         <Card>
           <CardHeader className="text-center">
-            <CardTitle className={cn("text-3xl", allCorrect ? "text-green-500" : "text-destructive")}>
-              {allCorrect ? "🎉 Perfect Score!" : "Game Over"}
+            <CardTitle className={cn("text-3xl", allCorrect ? "text-green-500" : completedAll ? "text-primary" : "text-destructive")}>
+              {allCorrect ? "Perfect Score!" : completedAll ? "Practice Complete!" : "Game Over"}
             </CardTitle>
             <CardDescription className="text-lg">
               You got {correctCount} out of {deck.length} cards correct
+              {practiceMode && !allCorrect && ` (${guessHistory.length - correctCount} mistakes)`}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
