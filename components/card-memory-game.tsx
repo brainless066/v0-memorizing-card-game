@@ -380,29 +380,29 @@ export function CardMemoryGame() {
                     record.isCorrect ? "bg-green-500/10 border-green-500/30" : "bg-red-500/10 border-red-500/30"
                   )}
                 >
-                  <span className="text-sm text-muted-foreground w-8">#{record.position}</span>
-                  <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground w-8 shrink-0">#{record.position}</span>
+                  <div className="flex items-center gap-2 shrink-0">
                     <PlayingCard card={record.correctCard} size="sm" />
                     <span className="text-xs text-muted-foreground">correct</span>
                   </div>
                   {record.guessedCard && !record.isCorrect && (
-                    <>
+                    <div className="flex items-center gap-2 shrink-0">
                       <span className="text-muted-foreground">vs</span>
-                      <div className="flex items-center gap-2">
-                        <PlayingCard card={record.guessedCard} size="sm" />
-                        <span className="text-xs text-muted-foreground">your guess</span>
-                      </div>
-                    </>
+                      <PlayingCard card={record.guessedCard} size="sm" />
+                      <span className="text-xs text-muted-foreground">your guess</span>
+                    </div>
                   )}
-                  <span className={cn(
-                    "ml-auto text-sm font-medium",
-                    record.isCorrect ? "text-green-500" : "text-red-500"
-                  )}>
-                    {record.isCorrect ? "✓" : "✗"}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {formatTime(record.timestamp)}
-                  </span>
+                  <div className="flex items-center gap-2 ml-auto shrink-0">
+                    <span className={cn(
+                      "text-sm font-medium",
+                      record.isCorrect ? "text-green-500" : "text-red-500"
+                    )}>
+                      {record.isCorrect ? "✓" : "✗"}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {formatTime(record.timestamp)}
+                    </span>
+                  </div>
                 </div>
               ))}
 
@@ -417,9 +417,11 @@ export function CardMemoryGame() {
                       key={card.id}
                       className="flex items-center gap-4 p-3 rounded-lg border bg-muted/50 border-muted"
                     >
-                      <span className="text-sm text-muted-foreground w-8">#{guessHistory.length + index + 1}</span>
-                      <PlayingCard card={card} size="sm" />
-                      <span className="text-xs text-muted-foreground">not attempted</span>
+                      <span className="text-sm text-muted-foreground w-8 shrink-0">#{guessHistory.length + index + 1}</span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <PlayingCard card={card} size="sm" />
+                        <span className="text-xs text-muted-foreground">not attempted</span>
+                      </div>
                     </div>
                   ))}
                 </>

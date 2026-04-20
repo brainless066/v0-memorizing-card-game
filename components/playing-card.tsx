@@ -51,20 +51,23 @@ export function PlayingCard({ card, size = "md", className, showBack = false }: 
   return (
     <div
       className={cn(
-        "rounded-lg border-2 border-border bg-card flex flex-col p-1.5 shadow-md relative",
+        "rounded-lg border-2 border-border bg-card flex flex-col justify-between p-1.5 shadow-md relative",
         sizeClasses[size],
         suitColors[card.suit],
         className
       )}
     >
+      {/* Top-left corner */}
       <div className="flex flex-col items-start leading-none">
         <span className="font-bold">{card.rank}</span>
         <span className="text-lg -mt-1">{card.suit}</span>
       </div>
-      <div className="absolute inset-0 flex items-center justify-center">
+      {/* Center suit watermark */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <span className="text-2xl opacity-20">{card.suit}</span>
       </div>
-      <div className="flex flex-col items-end leading-none mt-auto rotate-180">
+      {/* Bottom-right corner (upside down) */}
+      <div className="flex flex-col items-end leading-none rotate-180">
         <span className="font-bold">{card.rank}</span>
         <span className="text-lg -mt-1">{card.suit}</span>
       </div>
