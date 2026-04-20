@@ -456,21 +456,22 @@ export function CardMemoryGame() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-center gap-3">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSelectedSuit(null)}
-                    >
-                      Back
-                    </Button>
-                    <span className="text-muted-foreground">Selected:</span>
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-muted-foreground">Selected suit:</span>
                     <span className={cn(
                       "text-3xl",
                       selectedSuit === "♥" || selectedSuit === "♦" ? "text-red-500" : "text-foreground"
                     )}>
                       {selectedSuit}
                     </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedSuit(null)}
+                      className="ml-2"
+                    >
+                      Change
+                    </Button>
                   </div>
                   <p className="text-center text-muted-foreground">Now select the rank:</p>
                   <div className="grid grid-cols-5 gap-2">
@@ -507,18 +508,19 @@ export function CardMemoryGame() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-center gap-3">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSelectedRank(null)}
-                    >
-                      Back
-                    </Button>
-                    <span className="text-muted-foreground">Selected:</span>
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-muted-foreground">Selected rank:</span>
                     <span className="text-3xl font-bold">
                       {selectedRank}
                     </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedRank(null)}
+                      className="ml-2"
+                    >
+                      Change
+                    </Button>
                   </div>
                   <p className="text-center text-muted-foreground">Now select the suit:</p>
                   <div className="grid grid-cols-2 gap-3">
