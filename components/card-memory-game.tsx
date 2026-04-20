@@ -243,10 +243,10 @@ export function CardMemoryGame() {
                 </div>
               </div>
             ) : (
-              <div className="flex flex-wrap gap-2 justify-center max-h-[60vh] overflow-y-auto p-4">
+              <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-3 max-h-[60vh] overflow-y-auto p-4">
                 {deck.map((card, index) => (
-                  <div key={card.id} className="flex flex-col items-center">
-                    <span className="text-xs text-muted-foreground mb-1">{index + 1}</span>
+                  <div key={card.id} className="flex flex-col items-center gap-1">
+                    <span className="text-xs text-muted-foreground">{index + 1}</span>
                     <PlayingCard card={card} size="sm" />
                   </div>
                 ))}
@@ -376,30 +376,32 @@ export function CardMemoryGame() {
                 <div
                   key={index}
                   className={cn(
-                    "flex items-center gap-4 p-3 rounded-lg border",
+                    "grid grid-cols-[40px_1fr_auto] items-center gap-3 p-3 rounded-lg border",
                     record.isCorrect ? "bg-green-500/10 border-green-500/30" : "bg-red-500/10 border-red-500/30"
                   )}
                 >
-                  <span className="text-sm text-muted-foreground w-8 shrink-0">#{record.position}</span>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <PlayingCard card={record.correctCard} size="sm" />
-                    <span className="text-xs text-muted-foreground">correct</span>
-                  </div>
-                  {record.guessedCard && !record.isCorrect && (
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-muted-foreground">vs</span>
-                      <PlayingCard card={record.guessedCard} size="sm" />
-                      <span className="text-xs text-muted-foreground">your guess</span>
+                  <span className="text-sm text-muted-foreground">#{record.position}</span>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <div className="flex items-center gap-2">
+                      <PlayingCard card={record.correctCard} size="sm" />
+                      <span className="text-xs text-muted-foreground">correct</span>
                     </div>
-                  )}
-                  <div className="flex items-center gap-2 ml-auto shrink-0">
+                    {record.guessedCard && !record.isCorrect && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-muted-foreground">vs</span>
+                        <PlayingCard card={record.guessedCard} size="sm" />
+                        <span className="text-xs text-muted-foreground">guess</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
                     <span className={cn(
                       "text-sm font-medium",
                       record.isCorrect ? "text-green-500" : "text-red-500"
                     )}>
                       {record.isCorrect ? "✓" : "✗"}
                     </span>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">
                       {formatTime(record.timestamp)}
                     </span>
                   </div>
@@ -415,10 +417,10 @@ export function CardMemoryGame() {
                   {deck.slice(guessHistory.length).map((card, index) => (
                     <div
                       key={card.id}
-                      className="flex items-center gap-4 p-3 rounded-lg border bg-muted/50 border-muted"
+                      className="grid grid-cols-[40px_1fr] items-center gap-3 p-3 rounded-lg border bg-muted/50 border-muted"
                     >
-                      <span className="text-sm text-muted-foreground w-8 shrink-0">#{guessHistory.length + index + 1}</span>
-                      <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-sm text-muted-foreground">#{guessHistory.length + index + 1}</span>
+                      <div className="flex items-center gap-2">
                         <PlayingCard card={card} size="sm" />
                         <span className="text-xs text-muted-foreground">not attempted</span>
                       </div>
