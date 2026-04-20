@@ -39,13 +39,8 @@ export function CardMemoryGame() {
   const [gamePhase, setGamePhase] = useState<GamePhase>("setup")
   const [displayMode, setDisplayMode] = useState<DisplayMode>("one-by-one")
   const [practiceMode, setPracticeMode] = useState(false)
-  const [inputOrder, setInputOrder] = useState<InputOrder>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("cardGame-inputOrder")
-      if (saved === "suit-first" || saved === "rank-first") return saved
-    }
-    return "suit-first"
-  })
+  const [inputOrder, setInputOrder] = useState<InputOrder>("suit-first")
+  const [isHydrated, setIsHydrated] = useState(false)
   const [totalCards, setTotalCards] = useState(10)
   const [wrongFlash, setWrongFlash] = useState<{ correct: CardType; guessed: CardType } | null>(null)
   const [deck, setDeck] = useState<CardType[]>([])
@@ -60,10 +55,21 @@ export function CardMemoryGame() {
   const [recallElapsed, setRecallElapsed] = useState<number>(0)
   const [recallDuration, setRecallDuration] = useState<number>(0)
 
+  // Load input order preference from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem("cardGame-inputOrder")
+    if (saved === "suit-first" || saved === "rank-first") {
+      setInputOrder(saved)
+    }
+    setIsHydrated(true)
+  }, [])
+
   // Persist input order preference
   useEffect(() => {
-    localStorage.setItem("cardGame-inputOrder", inputOrder)
-  }, [inputOrder])
+    if (isHydrated) {
+      localStorage.setItem("cardGame-inputOrder", inputOrder)
+    }
+  }, [inputOrder, isHydrated])
 
   // Timer for memorize phase
   useEffect(() => {
