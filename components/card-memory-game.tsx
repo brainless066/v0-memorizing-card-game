@@ -155,7 +155,8 @@ export function CardMemoryGame() {
                 className="w-24 h-10 px-3 border border-input rounded-md bg-background text-foreground"
               />
               <span className="text-sm text-muted-foreground">
-                ({Math.ceil(totalCards / 52)} deck{Math.ceil(totalCards / 52) > 1 ? "s" : ""})
+                ({Math.floor(totalCards / 52)} deck{Math.floor(totalCards / 52) !== 1 ? "s" : ""}
+                {totalCards % 52 > 0 && ` + ${totalCards % 52} card${totalCards % 52 !== 1 ? "s" : ""}`})
               </span>
             </div>
             <div className="flex flex-wrap gap-2">
