@@ -39,7 +39,13 @@ export function CardMemoryGame() {
   const [gamePhase, setGamePhase] = useState<GamePhase>("setup")
   const [displayMode, setDisplayMode] = useState<DisplayMode>("one-by-one")
   const [practiceMode, setPracticeMode] = useState(false)
-  const [inputOrder, setInputOrder] = useState<InputOrder>("suit-first")
+  const [inputOrder, setInputOrder] = useState<InputOrder>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("cardGame-inputOrder")
+      if (saved === "suit-first" || saved === "rank-first") return saved
+    }
+    return "suit-first"
+  })
   const [totalCards, setTotalCards] = useState(10)
   const [wrongFlash, setWrongFlash] = useState<{ correct: CardType; guessed: CardType } | null>(null)
   const [deck, setDeck] = useState<CardType[]>([])
@@ -53,6 +59,11 @@ export function CardMemoryGame() {
   const [memorizeElapsed, setMemorizeElapsed] = useState<number>(0)
   const [recallElapsed, setRecallElapsed] = useState<number>(0)
   const [recallDuration, setRecallDuration] = useState<number>(0)
+
+  // Persist input order preference
+  useEffect(() => {
+    localStorage.setItem("cardGame-inputOrder", inputOrder)
+  }, [inputOrder])
 
   // Timer for memorize phase
   useEffect(() => {
