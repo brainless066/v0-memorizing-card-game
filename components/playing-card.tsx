@@ -19,10 +19,10 @@ interface PlayingCardProps {
 }
 
 const suitColors: Record<Suit, string> = {
-  "♠": "text-foreground",
-  "♣": "text-foreground",
-  "♥": "text-red-500",
-  "♦": "text-red-500",
+  "♠": "text-slate-900",
+  "♣": "text-slate-900",
+  "♥": "text-red-600",
+  "♦": "text-red-600",
 }
 
 const sizeClasses = {
@@ -36,13 +36,13 @@ export function PlayingCard({ card, size = "md", className, showBack = false }: 
     return (
       <div
         className={cn(
-          "rounded-lg border-2 border-border bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center shadow-md",
+          "rounded-lg border-2 border-amber-900/50 bg-gradient-to-br from-red-800 to-red-950 flex items-center justify-center shadow-lg",
           sizeClasses[size],
           className
         )}
       >
-        <div className="w-3/4 h-3/4 border border-blue-400/50 rounded flex items-center justify-center">
-          <span className="text-blue-300/80 text-lg">🂠</span>
+        <div className="w-3/4 h-3/4 border-2 border-amber-500/40 rounded bg-red-900/50 flex items-center justify-center">
+          <div className="w-full h-full bg-[repeating-linear-gradient(45deg,transparent,transparent_4px,rgba(212,175,55,0.15)_4px,rgba(212,175,55,0.15)_8px)]" />
         </div>
       </div>
     )
@@ -51,7 +51,7 @@ export function PlayingCard({ card, size = "md", className, showBack = false }: 
   return (
     <div
       className={cn(
-        "rounded-lg border-2 border-border bg-card p-1.5 shadow-md relative",
+        "rounded-lg border-2 border-amber-900/30 bg-amber-50 p-1.5 shadow-lg relative",
         sizeClasses[size],
         suitColors[card.suit],
         className
