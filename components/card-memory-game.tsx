@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils"
 
 type GamePhase = "setup" | "memorize" | "recall" | "result"
 type DisplayMode = "one-by-one" | "whole"
+type InputOrder = "suit-first" | "rank-first"
 
 interface GuessRecord {
   position: number
@@ -38,11 +39,13 @@ export function CardMemoryGame() {
   const [gamePhase, setGamePhase] = useState<GamePhase>("setup")
   const [displayMode, setDisplayMode] = useState<DisplayMode>("one-by-one")
   const [practiceMode, setPracticeMode] = useState(false)
+  const [inputOrder, setInputOrder] = useState<InputOrder>("suit-first")
   const [totalCards, setTotalCards] = useState(10)
   const [wrongFlash, setWrongFlash] = useState<{ correct: CardType; guessed: CardType } | null>(null)
   const [deck, setDeck] = useState<CardType[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [selectedSuit, setSelectedSuit] = useState<Suit | null>(null)
+  const [selectedRank, setSelectedRank] = useState<Rank | null>(null)
   const [guessHistory, setGuessHistory] = useState<GuessRecord[]>([])
   const [gameStartTime, setGameStartTime] = useState<number>(0)
   const [memorizeStartTime, setMemorizeStartTime] = useState<number>(0)
@@ -88,6 +91,7 @@ export function CardMemoryGame() {
     setMemorizeDuration(Date.now() - memorizeStartTime)
     setCurrentIndex(0)
     setSelectedSuit(null)
+    setSelectedRank(null)
     setRecallElapsed(0)
     setGamePhase("recall")
     setGameStartTime(Date.now())
@@ -106,20 +110,32 @@ export function CardMemoryGame() {
   }, [currentIndex])
 
   const handleSuitSelect = (suit: Suit) => {
-    setSelectedSuit(suit)
+    if (inputOrder === "suit-first") {
+      setSelectedSuit(suit)
+    } else {
+      // rank-first mode: suit is second selection, complete the guess
+      completeGuess(suit, selectedRank!)
+    }
   }
 
   const handleRankSelect = (rank: Rank) => {
-    if (!selectedSuit) return
+    if (inputOrder === "rank-first") {
+      setSelectedRank(rank)
+    } else {
+      // suit-first mode: rank is second selection, complete the guess
+      completeGuess(selectedSuit!, rank)
+    }
+  }
 
+  const completeGuess = (suit: Suit, rank: Rank) => {
     const guessedCard: CardType = {
-      suit: selectedSuit,
+      suit,
       rank,
       id: `guess-${currentIndex}`,
     }
 
     const correctCard = deck[currentIndex]
-    const isCorrect = correctCard.suit === selectedSuit && correctCard.rank === rank
+    const isCorrect = correctCard.suit === suit && correctCard.rank === rank
 
     const record: GuessRecord = {
       position: currentIndex + 1,
@@ -131,6 +147,7 @@ export function CardMemoryGame() {
 
     setGuessHistory([...guessHistory, record])
     setSelectedSuit(null)
+    setSelectedRank(null)
 
     if (!isCorrect) {
       if (practiceMode) {
@@ -262,6 +279,28 @@ export function CardMemoryGame() {
             </div>
           </div>
 
+          <div className="space-y-3">
+            <label className="text-sm font-medium text-foreground">Input Order</label>
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                variant={inputOrder === "suit-first" ? "default" : "outline"}
+                onClick={() => setInputOrder("suit-first")}
+                className="h-auto py-3 flex flex-col"
+              >
+                <span className="font-bold">Suit First</span>
+                <span className="text-xs opacity-80">Pick suit, then rank</span>
+              </Button>
+              <Button
+                variant={inputOrder === "rank-first" ? "default" : "outline"}
+                onClick={() => setInputOrder("rank-first")}
+                className="h-auto py-3 flex flex-col"
+              >
+                <span className="font-bold">Rank First</span>
+                <span className="text-xs opacity-80">Pick rank, then suit</span>
+              </Button>
+            </div>
+          </div>
+
           <Button onClick={startGame} className="w-full" size="lg">
             Start Game
           </Button>
@@ -383,54 +422,105 @@ export function CardMemoryGame() {
               />
             </div>
 
-            {!selectedSuit ? (
-              <div className="space-y-4">
-                <p className="text-center text-muted-foreground">Select the suit first:</p>
-                <div className="grid grid-cols-2 gap-3">
-                  {SUITS.map((suit) => (
-                    <Button
-                      key={suit}
-                      onClick={() => handleSuitSelect(suit)}
-                      className={cn("h-16 text-2xl", suitButtonColors[suit])}
-                    >
-                      {suit} {suitNames[suit]}
-                    </Button>
-                  ))}
+            {inputOrder === "suit-first" ? (
+              // Suit-first mode
+              !selectedSuit ? (
+                <div className="space-y-4">
+                  <p className="text-center text-muted-foreground">Select the suit first:</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {SUITS.map((suit) => (
+                      <Button
+                        key={suit}
+                        onClick={() => handleSuitSelect(suit)}
+                        className={cn("h-16 text-2xl", suitButtonColors[suit])}
+                      >
+                        {suit} {suitNames[suit]}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-muted-foreground">Selected suit:</span>
+                    <span className={cn(
+                      "text-3xl",
+                      selectedSuit === "♥" || selectedSuit === "♦" ? "text-red-500" : "text-foreground"
+                    )}>
+                      {selectedSuit}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedSuit(null)}
+                      className="ml-2"
+                    >
+                      Change
+                    </Button>
+                  </div>
+                  <p className="text-center text-muted-foreground">Now select the rank:</p>
+                  <div className="grid grid-cols-5 gap-2">
+                    {RANKS.map((rank) => (
+                      <Button
+                        key={rank}
+                        variant="outline"
+                        onClick={() => handleRankSelect(rank)}
+                        className="h-12 text-lg font-bold"
+                      >
+                        {rank}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )
             ) : (
-              <div className="space-y-4">
-                <div className="flex items-center justify-center gap-2">
-                  <span className="text-muted-foreground">Selected suit:</span>
-                  <span className={cn(
-                    "text-3xl",
-                    selectedSuit === "♥" || selectedSuit === "♦" ? "text-red-500" : "text-foreground"
-                  )}>
-                    {selectedSuit}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setSelectedSuit(null)}
-                    className="ml-2"
-                  >
-                    Change
-                  </Button>
+              // Rank-first mode
+              !selectedRank ? (
+                <div className="space-y-4">
+                  <p className="text-center text-muted-foreground">Select the rank first:</p>
+                  <div className="grid grid-cols-5 gap-2">
+                    {RANKS.map((rank) => (
+                      <Button
+                        key={rank}
+                        variant="outline"
+                        onClick={() => handleRankSelect(rank)}
+                        className="h-12 text-lg font-bold"
+                      >
+                        {rank}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
-                <p className="text-center text-muted-foreground">Now select the rank:</p>
-                <div className="grid grid-cols-5 gap-2">
-                  {RANKS.map((rank) => (
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-muted-foreground">Selected rank:</span>
+                    <span className="text-3xl font-bold">
+                      {selectedRank}
+                    </span>
                     <Button
-                      key={rank}
-                      variant="outline"
-                      onClick={() => handleRankSelect(rank)}
-                      className="h-12 text-lg font-bold"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedRank(null)}
+                      className="ml-2"
                     >
-                      {rank}
+                      Change
                     </Button>
-                  ))}
+                  </div>
+                  <p className="text-center text-muted-foreground">Now select the suit:</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {SUITS.map((suit) => (
+                      <Button
+                        key={suit}
+                        onClick={() => handleSuitSelect(suit)}
+                        className={cn("h-16 text-2xl", suitButtonColors[suit])}
+                      >
+                        {suit} {suitNames[suit]}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )
             )}
           </CardContent>
         </Card>
