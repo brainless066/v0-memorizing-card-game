@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { PlayingCard, createMultiDeck, type Card as CardType, type Suit, type Rank } from "@/components/playing-card"
@@ -45,6 +45,18 @@ export function CardMemoryGame() {
   const [gameStartTime, setGameStartTime] = useState<number>(0)
   const [memorizeStartTime, setMemorizeStartTime] = useState<number>(0)
   const [memorizeDuration, setMemorizeDuration] = useState<number>(0)
+  const [recallElapsed, setRecallElapsed] = useState<number>(0)
+
+  // Timer for recall phase
+  useEffect(() => {
+    if (gamePhase !== "recall") return
+    
+    const interval = setInterval(() => {
+      setRecallElapsed(Date.now() - gameStartTime)
+    }, 100)
+    
+    return () => clearInterval(interval)
+  }, [gamePhase, gameStartTime])
 
   const startGame = useCallback(() => {
     const newDeck = createMultiDeck(totalCards)
@@ -60,6 +72,7 @@ export function CardMemoryGame() {
     setMemorizeDuration(Date.now() - memorizeStartTime)
     setCurrentIndex(0)
     setSelectedSuit(null)
+    setRecallElapsed(0)
     setGamePhase("recall")
     setGameStartTime(Date.now())
   }, [memorizeStartTime])
@@ -269,6 +282,9 @@ export function CardMemoryGame() {
       <div className="w-full max-w-2xl mx-auto space-y-6">
         <Card>
           <CardHeader className="text-center">
+            <div className="text-3xl font-mono font-bold text-primary mb-2">
+              {formatTime(recallElapsed)}
+            </div>
             <CardTitle>Recall Card #{currentIndex + 1}</CardTitle>
             <CardDescription>
               {correctCount} correct so far • {deck.length - currentIndex} remaining
