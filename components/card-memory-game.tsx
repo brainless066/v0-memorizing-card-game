@@ -279,26 +279,24 @@ export function CardMemoryGame() {
             </div>
           </div>
 
-          <div className="space-y-3">
+          <div className="flex items-center justify-between">
             <label className="text-sm font-medium text-foreground">Input Order</label>
-            <div className="grid grid-cols-2 gap-3">
-              <Button
-                variant={inputOrder === "suit-first" ? "default" : "outline"}
-                onClick={() => setInputOrder("suit-first")}
-                className="h-auto py-3 flex flex-col"
-              >
-                <span className="font-bold">Suit First</span>
-                <span className="text-xs opacity-80">Pick suit, then rank</span>
-              </Button>
-              <Button
-                variant={inputOrder === "rank-first" ? "default" : "outline"}
-                onClick={() => setInputOrder("rank-first")}
-                className="h-auto py-3 flex flex-col"
-              >
-                <span className="font-bold">Rank First</span>
-                <span className="text-xs opacity-80">Pick rank, then suit</span>
-              </Button>
-            </div>
+            <button
+              onClick={() => setInputOrder(inputOrder === "suit-first" ? "rank-first" : "suit-first")}
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <span className={inputOrder === "suit-first" ? "text-foreground font-medium" : ""}>Suit first</span>
+              <div className={cn(
+                "relative w-10 h-5 rounded-full transition-colors",
+                inputOrder === "rank-first" ? "bg-primary" : "bg-muted"
+              )}>
+                <div className={cn(
+                  "absolute top-0.5 w-4 h-4 rounded-full bg-foreground transition-transform",
+                  inputOrder === "rank-first" ? "translate-x-5" : "translate-x-0.5"
+                )} />
+              </div>
+              <span className={inputOrder === "rank-first" ? "text-foreground font-medium" : ""}>Rank first</span>
+            </button>
           </div>
 
           <Button onClick={startGame} className="w-full" size="lg">
